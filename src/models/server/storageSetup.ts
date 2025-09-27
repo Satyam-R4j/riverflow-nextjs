@@ -1,14 +1,16 @@
-import { IndexType, Permission } from "node-appwrite";
+import { Permission } from "node-appwrite";
 
 import { questionAttachmentBucket} from "../name";
 import { storage } from "./config";
 
 export default async function getOrCreateStorage(){
     try {
-        await storage.getBucket(questionAttachmentBucket)
-        console.log("Storage connected");
+        console.log(`Attempting to connect to storage bucket: ${questionAttachmentBucket}`);
+        await storage.getBucket(questionAttachmentBucket);
+        console.log("Storage bucket connected successfully");
         
-    } catch (error) {
+    } catch (_error) {
+        console.log(`Storage bucket '${questionAttachmentBucket}' not found, creating new bucket...`);
         try {
             await storage.createBucket(
                 questionAttachmentBucket,
@@ -22,15 +24,16 @@ export default async function getOrCreateStorage(){
                 false,
                 undefined,
                 undefined,["jpg","png","gif","jpeg","webp","heic"]
-            )
+            );
 
-            console.log("Storage is Created");
-            console.log("Storage is connected");
+            console.log(`Storage bucket '${questionAttachmentBucket}' created successfully`);
+            console.log("Storage setup completed");
             
-        } catch (error) {
-            console.error("Error crating storage:", error);
-            
+        } catch (createError) {
+            console.error("Error creating storage bucket:", createError);
+            throw createError;
         }
     }
+    return storage;
 }
 
